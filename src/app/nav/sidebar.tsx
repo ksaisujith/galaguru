@@ -1,7 +1,9 @@
-import * as React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { OverridableComponent } from '@mui/material/OverridableComponent';
-import { SvgIconTypeMap } from '@mui/material';
-import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
+import { SvgIconTypeMap, Tooltip } from '@mui/material';
+import { styled, Theme, CSSObject } from '@mui/material/styles';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import EventRoundedIcon from '@mui/icons-material/EventRounded';
 import EditCalendarRoundedIcon from '@mui/icons-material/EditCalendarRounded';
@@ -24,6 +26,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
+import { useRouter } from 'next/navigation';
 
 interface DrawerOpenStateProps {
     drawerWidth: number;
@@ -31,7 +34,7 @@ interface DrawerOpenStateProps {
     handleDrawer: () => void;
 }
 
-const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawerWidth }) => {
+const SideBar: React.FC<DrawerOpenStateProps> = ({ menuOpen, handleDrawer, drawerWidth }) => {
     const openedMixin = (theme: Theme): CSSObject => ({
         width: drawerWidth,
         transition: theme.transitions.create('width', {
@@ -40,20 +43,19 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
         }),
         overflowX: 'hidden',
     });
-    
-    
+
     const closedMixin = (theme: Theme): CSSObject => ({
         transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
         overflowX: 'hidden',
-        width: `calc(${theme.spacing(7)} + 1px)`,
+        width: `calc(${theme.spacing(8)} + 1px)`,
         [theme.breakpoints.up('sm')]: {
-            width: `calc(${theme.spacing(8)} + 1px)`,
+            width: `calc(${theme.spacing(9)} + 10px)`,
         },
     });
-    
+
     const DrawerHeader = styled('div')(({ theme }) => ({
         display: 'flex',
         alignItems: 'center',
@@ -62,7 +64,7 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
         // necessary for content to be below app bar
         ...theme.mixins.toolbar,
     }));
-    
+
     const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
         ({ theme, open }) => ({
             width: drawerWidth,
@@ -80,9 +82,9 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
         }),
     );
 
-
-    const [subMenuEventsOpen, setSubMenuEventsOpen] = React.useState(false);
-    const [subMenuUsersOpen, setSubMenuUsersOpen] = React.useState(false);
+    const router = useRouter();
+    const [subMenuEventsOpen, setSubMenuEventsOpen] = useState<boolean>(false);
+    const [subMenuUsersOpen, setSubMenuUsersOpen] = useState<boolean>(false);
 
     const handleEventsSubMenuClick = () => {
         setSubMenuEventsOpen(!subMenuEventsOpen);
@@ -99,10 +101,10 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
     };
 
     const MenuItems: MenuItem[] = [
-        { label: "Dashboard", icon: DashboardRoundedIcon, href: "/" },
+        { label: "Dashboard", icon: DashboardRoundedIcon, href: "/dashboard" },
         { label: "Events", icon: LocalActivityRoundedIcon, href: "/" },
         { label: "Users", icon: PeopleAltRoundedIcon, href: "/" },
-        { label: "Manage event", icon: EventNoteRoundedIcon, href: "/manage" },
+        { label: "Host event", icon: EventNoteRoundedIcon, href: "/hostEvent" },
     ];
 
     type SubMenuItem = {
@@ -110,7 +112,6 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
         Control: () => void;
         StateControl: boolean;
     };
-
 
     const SubMenuItems: Map<string, SubMenuItem> = new Map([
         ["Events", {
@@ -121,11 +122,10 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
             StateControl: subMenuEventsOpen
         }],
 
-
         ["Users", {
-            Items: [{ label: "Create", icon: PersonAddRoundedIcon, href: "/users/edit" },
-            { label: "View", icon: PersonSearchRoundedIcon, href: "/users/edit" },
-            { label: "Edit", icon: ManageAccountsRoundedIcon, href: "/users/edit" }],
+            Items: [{ label: "Add new", icon: PersonAddRoundedIcon, href: "/users/create" },
+            { label: "Search", icon: PersonSearchRoundedIcon, href: "/users/view" },
+            { label: "Manage", icon: ManageAccountsRoundedIcon, href: "/users/edit" }],
             Control: handleUsersSubMenuClick,
             StateControl: subMenuUsersOpen
         }]
@@ -134,14 +134,18 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
     const handleMenuItemClick = (MenuItemLabel: string) => {
         if (SubMenuItems.has(MenuItemLabel)) {
             SubMenuItems.get(MenuItemLabel)?.Control();
+
         } else {
             const href: string | undefined = MenuItems.find(item => item.label === MenuItemLabel)?.href;
 
-
             if (href) {
-                // router.push(href);
+                router.push(href);
             }
         }
+    }
+
+    const handleSubmenuItemClick = (href: string) => {
+        router.push(href);
     }
 
     return (
@@ -158,24 +162,23 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
                         <ListItem key={item.label} disablePadding sx={{ display: 'block' }}>
                             <ListItemButton
                                 onClick={() => handleMenuItemClick(item.label)}
-
-
                                 sx={{
                                     minHeight: 48,
                                     justifyContent: menuOpen ? 'initial' : 'center',
                                     px: 2.5,
                                 }}
                             >
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 0,
-                                        mr: menuOpen ? 3 : 'auto',
-                                        justifyContent: 'center',
-                                    }}
-                                >
-                                    <item.icon />
-                                </ListItemIcon>
-
+                                <Tooltip title={item.label}>
+                                    <ListItemIcon
+                                        sx={{
+                                            minWidth: 0,
+                                            mr: menuOpen ? 3 : 'auto',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <item.icon />
+                                    </ListItemIcon>
+                                </Tooltip>
 
                                 <ListItemText primary={item.label} sx={{ opacity: menuOpen ? 1 : 0 }} />
                                 {SubMenuItems.has(item.label) && (SubMenuItems.get(item.label)?.StateControl ? <ExpandLess /> : <ExpandMore />)}
@@ -185,10 +188,14 @@ const SideBar: React.FC<DrawerOpenStateProps> = ({menuOpen, handleDrawer, drawer
                             <Collapse in={SubMenuItems.get(item.label)?.StateControl} timeout="auto" unmountOnExit>
                                 <List disablePadding>
                                     {SubMenuItems.get(item.label)?.Items.map((subItem, index) => (
-                                        <ListItemButton key={subItem.label} sx={{ pl: 4 }}>
-                                            <ListItemIcon>
-                                                <subItem.icon />
-                                            </ListItemIcon>
+                                        <ListItemButton key={subItem.label}
+                                            onClick={() => handleSubmenuItemClick(subItem.href)}
+                                            sx={{ pl: 4 }}>
+                                            <Tooltip title={subItem.label}>
+                                                <ListItemIcon>
+                                                    <subItem.icon />
+                                                </ListItemIcon>
+                                            </Tooltip>
                                             <ListItemText primary={subItem.label} />
                                         </ListItemButton>
                                     ))}

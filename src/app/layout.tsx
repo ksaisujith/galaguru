@@ -24,7 +24,7 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <Nav drawerWidth = {drawerWidth} />
+            <Nav drawerWidth={drawerWidth} />
             <Box
               component="main"
               sx={{
@@ -34,7 +34,7 @@ export default function RootLayout({
                 marginLeft: `${drawerWidth}px`, // Ensure content starts after drawer
               }}
             >
-              <Toolbar/>
+              <Toolbar />
               <Container>
                 {children}
               </Container>

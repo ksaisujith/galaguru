@@ -16,7 +16,10 @@
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.16.7",
     "@mui/material-nextjs": "^5.16.6",
+    "ldrs": "^1.0.2",
+    "mysql2": "^3.11.0",
     "next": "14.2.5",
+    "pg": "^8.12.0",
     "react": "^18",
     "react-dom": "^18"
   },
